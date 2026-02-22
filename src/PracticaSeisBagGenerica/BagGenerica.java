@@ -1,4 +1,4 @@
-package PracticaSeisGenericos;
+package PracticaSeisBagGenerica;
 
 import java.util.HashSet;
 import java.util.Random;

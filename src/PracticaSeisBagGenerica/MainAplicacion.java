@@ -1,4 +1,4 @@
-package PracticaSeisGenericos;
+package PracticaSeisBagGenerica;
 
 public class MainAplicacion {
 
