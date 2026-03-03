@@ -1,29 +1,71 @@
 package PracticaSieteBagConIteradores;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
 
+/**
+ * Clase BagGenericaConIterator de tipo genérico.
+ * 
+ * Permite almacenar elementos de tipo T dentro de una bolsa.
+ * 
+ * 
+ *
+ * @param <T> tipo genérico que definirá la bolsa.
+ */
 public class BagGenericaConIterator<T> implements Iterable<T> {
 
-	private HashSet<T> bolsa = new HashSet<>();
+	/** Array donde se almacena los elementos de la bolsa. */
+	private T[] bolsa;
+
+	/** Atributo donde almacenaremos el número real de elementos en la bolsa. */
+	private int tamano;
 
 	/**
-	 * Añade un elemento a la bolsa.
+	 * Constructor de clase sin parámetros.
+	 * 
+	 * Inicializa una bolsa con una longitud de array de 10 y un tamaño(elementos
+	 * reales dentro del array) de 0.
+	 */
+	@SuppressWarnings("unchecked")
+	public BagGenericaConIterator() {
+		bolsa = (T[]) new Object[10];
+		tamano = 0;
+	}
+
+	/**
+	 * Añade un elemento a la bolsa. Si el array está lleno, se amplía al doble de
+	 * su "lenght". Además sumamos +1 al atributo tamaño, para dejar registro de ese
+	 * nuevo elemento.
 	 *
 	 * @param e elemento de tipo genérico T que se va a añadir.
-	 * @return true, si el elemento se añadió correctamente. Al ser HashSet solo
-	 *         añadirá si el elemento no existe ya en la bolsa.
+	 * @return true, si el elemento se añadió correctamente.
 	 */
 	public boolean add(T e) {
-		return bolsa.add(e);
+		if (tamano == bolsa.length) {
+			ampliarBolsa();
+		}
+		bolsa[tamano++] = e;
+		return true;
+	}
+
+	/**
+	 * Duplica la capacidad del array(bolsa). Para esto, creamos otro array
+	 * provisional del doble de capacidad del original. Copiaremos los elementos del
+	 * original al nuevo array "nuevaBolsa" y finalmente hacemos que "bolsa" apunte
+	 * al nuevo array ampliado.
+	 */
+	@SuppressWarnings("unchecked")
+	private void ampliarBolsa() {
+		T[] nuevaBolsa = (T[]) new Object[bolsa.length * 2];
+		System.arraycopy(bolsa, 0, nuevaBolsa, 0, bolsa.length);
+		bolsa = nuevaBolsa;
 	}
 
 	/**
 	 * Elimina todos los elementos de la bolsa.
 	 */
 	public void clear() {
-		bolsa.clear();
+		tamano = 0;
 		System.out.println("Bolsa vaciada");
 	}
 
@@ -35,7 +77,13 @@ public class BagGenericaConIterator<T> implements Iterable<T> {
 	 * @return true, si la lista contiene ese elemento.
 	 */
 	public boolean contains(T e) {
-		return bolsa.contains(e);
+		boolean isExiste = false;
+		for (int i = 0; i < tamano; i++) {
+			if (bolsa[i].equals(e)) {
+				isExiste = true;
+			}
+		}
+		return isExiste;
 	}
 
 	/**
@@ -44,53 +92,61 @@ public class BagGenericaConIterator<T> implements Iterable<T> {
 	 * @return true, si está vacía.
 	 */
 	public boolean isEmpty() {
-		return bolsa.isEmpty();
+		return tamano == 0;
 	}
 
 	/**
 	 * Método para saber tamaño de la bolsa.
+	 * 
+	 * NOTA: Este método devuelve el tamaño de la bolsa, es decir los elementos que
+	 * hay dentro de ella. NO devuelve el tamaño del array (bolsa.lenght).
 	 *
 	 * @return tamaño de la bolsa.
 	 */
 	public int size() {
-		return bolsa.size();
+		return tamano;
 	}
 
 	/**
 	 * Extrae un elemento de la bolsa. Todos, independientemente de cuando se hayan
 	 * introducido, tienen la misma probabilidad de ser seleccionados. Para generar
 	 * el indice aleatorio se utiliza el método
-	 * {@link java.util.Random#nextInt(int)} de la clase {@link java.util.Random}
+	 * {@link java.util.Random#nextInt(int)} de la clase {@link java.util.Random}.
+	 * 
+	 * El último elemento de la lista se copia en la posición del elemento extraido
+	 * y su posición como último elemento del array pasa a "null". Para finalizar,
+	 * restamos -1 al tamaño de la bolsa.
 	 *
-	 * @return Devuelve el elemento extraido. En caso de que la lista se encuentre
-	 *         vacía, devolverá un "null".
+	 * @return elemento. Devuelve el elemento extraido. En caso de que la lista se
+	 *         encuentre vacía, devolverá un "null".
 	 */
 	public T extract() {
 
-		if (!bolsa.isEmpty()) {
-			Random aleatorio = new Random();
-			int indiceAleatorio = aleatorio.nextInt(bolsa.size());
-			int indiceIteracion = 0;
-
-			for (T elementoHashSet : bolsa) {
-				if (indiceIteracion == indiceAleatorio) {
-					bolsa.remove(elementoHashSet);
-					return elementoHashSet;
-				}
-				indiceIteracion++;
-			}
+		if (isEmpty()) {
+			return null;
 		}
-		return null;
+
+		Random aleatorio = new Random();
+		int indicePosicionAleatoria = aleatorio.nextInt(tamano);
+
+		T elemento = bolsa[indicePosicionAleatoria];
+		bolsa[indicePosicionAleatoria] = bolsa[tamano - 1];
+		bolsa[tamano - 1] = null;
+		tamano--;
+
+		return elemento;
+
 	}
 
 	/**
-	 * Método iterator
+	 * Método iterator. Para ello acudimos al iterador de la bolsa "BagIterator".
 	 *
-	 * @return devuelve un {@link Iterator} de tipo T que recorre los elementos de la bolsa.
+	 * @return devuelve un {@link Iterator} de tipo T que recorre los elementos de
+	 *         la bolsa.
 	 */
 	@Override
 	public Iterator<T> iterator() {
-		return bolsa.iterator();
+		return new BagIterator<T>(bolsa, tamano);
 	}
 
 	/**
@@ -103,7 +159,5 @@ public class BagGenericaConIterator<T> implements Iterable<T> {
 	public String toString() {
 		return bolsa.toString();
 	}
-
-
 
 }
